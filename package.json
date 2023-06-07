@@ -41,7 +41,10 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/mhmdnasser124/react-native-background-runner",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhmdnasser124/react-native-background-runner.git"
+  },
   "author": "mhmd nofal <mhmdnofal124@gmail.com> (https://github.com/mhmdnasser124)",
   "license": "MIT",
   "bugs": {
@@ -159,5 +162,8 @@
   },
   "dependencies": {
     "eventemitter3": "^4.0.7"
+  },
+  "directories": {
+    "example": "example"
   }
 }

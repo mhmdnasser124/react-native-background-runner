@@ -8,6 +8,22 @@ background react native runner
 npm install react-native-background-runner
 ```
 
+Android only
+
+Add the following code to android/app/src/main/AndroidManifest.xml:
+
+```sh
+<manifest ...>
+  ...
+  <application ...>
+    ...
+    <service android:name="com.backgroundrunner.BackgroundRunnerTask" />
+  </application>
+</manifest>
+```
+
+After adding the code to the AndroidManifest.xml file, save the changes and continue with the Usage instructions.
+
 ## Usage
 
 ```js
@@ -55,5 +71,3 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 MIT
 
 ---
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
