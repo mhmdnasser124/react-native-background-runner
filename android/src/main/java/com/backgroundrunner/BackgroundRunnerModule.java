@@ -1,19 +1,82 @@
 package com.backgroundrunner;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+
+import com.backgroundrunner.tracker.FallbackLocationTracker;
+import android.location.LocationListener;
+import android.location.Location;
+import android.location.LocationManager;
+
 import androidx.annotation.NonNull;
 
+import com.backgroundrunner.tracker.LocationTracker;
+import com.backgroundrunner.tracker.ProviderLocationTracker;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-@ReactModule(name = BackgroundRunnerModule.NAME)
-public class BackgroundRunnerModule extends ReactContextBaseJavaModule {
+public class BackgroundRunnerModule extends ReactContextBaseJavaModule implements LocationTracker.LocationUpdateListener {
   public static final String NAME = "BackgroundRunner";
+  private final ReactContext context;
+  private Intent currentService;
+  private FallbackLocationTracker locationTracker;
 
   public BackgroundRunnerModule(ReactApplicationContext reactContext) {
     super(reactContext);
+    this.context = reactContext;
+  }
+
+  @ReactMethod
+  public void startLocationTracking() {
+    locationTracker = new FallbackLocationTracker(context, ProviderLocationTracker.ProviderType.GPS);
+    locationTracker.start(this);
+  }
+
+  @ReactMethod
+  public void stopLocationTracking() {
+    if (locationTracker != null) {
+      locationTracker.stop();
+    }
+  }
+
+  @Override
+  public void onUpdate(Location oldLoc, long oldTime, Location newLoc, long newTime) {
+    WritableMap params = Arguments.createMap();
+    params.putDouble("latitude", newLoc.getLatitude());
+    params.putDouble("longitude", newLoc.getLongitude());
+
+    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+      .emit("locationUpdate", params);
+  }
+  @ReactMethod
+  public void start(final ReadableMap backOptions, final Promise promise){
+    try{
+      if(currentService != null) context.stopService(currentService);
+      currentService = new Intent(context, BackgroundRunnerTask.class);
+      final Options options = new Options(context, backOptions);
+      currentService.putExtras(options.getParams());
+      context.startService(currentService);
+      promise.resolve(null);
+
+    }catch (Exception e){
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
+  public void stop(@NonNull final Promise promise) {
+      if (currentService != null)
+          context.stopService(currentService);
+      promise.resolve(null);
   }
 
   @Override
@@ -23,10 +86,14 @@ public class BackgroundRunnerModule extends ReactContextBaseJavaModule {
   }
 
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
-  }
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Keep: Required for RN built in Event Emitter Calls.
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Keep: Required for RN built in Event Emitter Calls.
+    }
+
 }
