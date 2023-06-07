@@ -15,7 +15,23 @@ import Service from 'react-native-background-runner';
 
 // ...
 
-const toggleBackground = async () => {
+const options = {
+  title: 'title',
+  desc: 'desc',
+  delay: 1000,
+};
+
+const task = async (taskData) => {
+  await new Promise(async (resolve) => {
+    const { delay } = taskData;
+    for (let counter = 0; Service.isRunning(); counter++) {
+      console.log('Task is running ', counter);
+      await sleep(delay);
+    }
+  });
+};
+
+const StartBackgroundService = async () => {
   if (!Service.isRunning()) {
     try {
       await Service.startRunnerTask(task, options);
