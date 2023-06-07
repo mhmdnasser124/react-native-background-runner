@@ -11,11 +11,23 @@ npm install react-native-background-runner
 ## Usage
 
 ```js
-import { multiply } from 'react-native-background-runner';
+import Service from 'react-native-background-runner';
 
 // ...
 
-const result = await multiply(3, 7);
+const toggleBackground = async () => {
+  if (!Service.isRunning()) {
+    try {
+      await Service.startRunnerTask(task, options);
+      console.log('Successful start!');
+    } catch (e) {
+      console.log('Error', e);
+    }
+  } else {
+    console.log('Stop background service');
+    await Service.stop();
+  }
+};
 ```
 
 ## Contributing
