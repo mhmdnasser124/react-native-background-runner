@@ -10,7 +10,7 @@ npm install react-native-background-runner
 
 Demo
 
-<img src="./Screensshots/LocationTracker.gif"/>
+![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/LocationTracker.gif 'Location Tracker')
 
 Android only
 
