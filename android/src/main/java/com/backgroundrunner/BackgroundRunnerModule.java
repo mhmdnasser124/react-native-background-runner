@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.backgroundrunner.tracker.FallbackLocationTracker;
+
 import android.location.LocationListener;
 import android.location.Location;
 import android.location.LocationManager;
@@ -57,26 +58,54 @@ public class BackgroundRunnerModule extends ReactContextBaseJavaModule implement
     getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
       .emit("locationUpdate", params);
   }
+
   @ReactMethod
-  public void start(final ReadableMap backOptions, final Promise promise){
-    try{
-      if(currentService != null) context.stopService(currentService);
+  public void getCurrentLocation(final Promise promise) {
+    try {
+      if (locationTracker != null) {
+        Location location = locationTracker.getPossiblyStaleLocation();
+        if (location != null) {
+          // Create a new writable map to hold the location data
+          WritableMap locationData = Arguments.createMap();
+
+          // Add the relevant location properties to the map
+          locationData.putDouble("latitude", location.getLatitude());
+          locationData.putDouble("longitude", location.getLongitude());
+          locationData.putDouble("accuracy", location.getAccuracy());
+
+          // Resolve the promise with the location data
+          promise.resolve(locationData);
+
+//        promise.resolve(location);
+        }
+      }
+      promise.resolve(null);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+
+  }
+
+  @ReactMethod
+  public void start(final ReadableMap backOptions, final Promise promise) {
+    try {
+      if (currentService != null) context.stopService(currentService);
       currentService = new Intent(context, BackgroundRunnerTask.class);
       final Options options = new Options(context, backOptions);
       currentService.putExtras(options.getParams());
       context.startService(currentService);
       promise.resolve(null);
 
-    }catch (Exception e){
+    } catch (Exception e) {
       promise.reject(e);
     }
   }
 
   @ReactMethod
   public void stop(@NonNull final Promise promise) {
-      if (currentService != null)
-          context.stopService(currentService);
-      promise.resolve(null);
+    if (currentService != null)
+      context.stopService(currentService);
+    promise.resolve(null);
   }
 
   @Override
@@ -86,14 +115,14 @@ public class BackgroundRunnerModule extends ReactContextBaseJavaModule implement
   }
 
 
-    @ReactMethod
-    public void addListener(String eventName) {
-        // Keep: Required for RN built in Event Emitter Calls.
-    }
+  @ReactMethod
+  public void addListener(String eventName) {
+    // Keep: Required for RN built in Event Emitter Calls.
+  }
 
-    @ReactMethod
-    public void removeListeners(Integer count) {
-        // Keep: Required for RN built in Event Emitter Calls.
-    }
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    // Keep: Required for RN built in Event Emitter Calls.
+  }
 
 }

@@ -9,14 +9,15 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.Manifest;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 public class ProviderLocationTracker implements LocationListener, LocationTracker {
 
-  // The minimum distance to change Updates in meters
-  private static final long MIN_UPDATE_DISTANCE = 10;
+  private static final long MIN_UPDATE_DISTANCE = 1;
 
-  // The minimum time between updates in milliseconds
-  private static final long MIN_UPDATE_TIME = 1000 * 60;
+  private static final long MIN_UPDATE_TIME = 10;
 
   private LocationManager lm;
 
@@ -33,10 +34,10 @@ public class ProviderLocationTracker implements LocationListener, LocationTracke
 
   private LocationUpdateListener listener;
 
-  private Context context; // Add this field
+  private Context context;
 
   public ProviderLocationTracker(Context context, ProviderType type) {
-    this.context = context; // Initialize the context field
+    this.context = context;
     lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     if(type == ProviderType.NETWORK){
       provider = LocationManager.NETWORK_PROVIDER;
@@ -48,18 +49,18 @@ public class ProviderLocationTracker implements LocationListener, LocationTracke
 
   public void start(){
     if(isRunning){
-      //Already running, do nothing
       return;
     }
 
-    // Check if permission is granted before requesting location updates
     Log.d("checkLocationPermission", String.valueOf(checkLocationPermission()));
     if (checkLocationPermission()) {
-      // The provider is on, so start getting updates. Update current location
       isRunning = true;
+      Log.d("requestLocation ", provider);
       lm.requestLocationUpdates(provider, MIN_UPDATE_TIME, MIN_UPDATE_DISTANCE, this);
       lastLocation = null;
       lastTime = 0;
+    }else{
+      requestLocationPermission();
     }
   }
 
@@ -76,8 +77,26 @@ public class ProviderLocationTracker implements LocationListener, LocationTracke
       return coarseLocationPermission == PackageManager.PERMISSION_GRANTED &&
         fineLocationPermission == PackageManager.PERMISSION_GRANTED;
     }
-    return true; // Permissions are granted for lower API levels
+    return true;
   }
+
+private void requestLocationPermission() {
+  int coarseLocationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION);
+  int fineLocationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
+
+  // if (coarseLocationPermission != PackageManager.PERMISSION_GRANTED ||
+  //     fineLocationPermission != PackageManager.PERMISSION_GRANTED) {
+  //   ActivityCompat.requestPermissions(
+  //     context.getCurrentActivity(),
+  //     new String[]{
+  //       Manifest.permission.ACCESS_COARSE_LOCATION,
+  //       Manifest.permission.ACCESS_FINE_LOCATION
+  //     },
+  //     PERMISSION_REQUEST_CODE
+  //   );
+  // }
+}
+
 
   public void stop(){
     if(isRunning){
@@ -91,7 +110,7 @@ public class ProviderLocationTracker implements LocationListener, LocationTracke
     if(lastLocation == null){
       return false;
     }
-    if(System.currentTimeMillis() - lastTime > 5 * MIN_UPDATE_TIME){
+    if(System.currentTimeMillis() - lastTime >  MIN_UPDATE_TIME){
       return false; //stale
     }
     return true;
@@ -108,7 +127,7 @@ public class ProviderLocationTracker implements LocationListener, LocationTracke
     if(lastLocation == null){
       return null;
     }
-    if(System.currentTimeMillis() - lastTime > 5 * MIN_UPDATE_TIME){
+    if(System.currentTimeMillis() - lastTime >  MIN_UPDATE_TIME){
       return null; //stale
     }
     return lastLocation;

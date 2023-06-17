@@ -1,9 +1,23 @@
-import { Platform, AppRegistry } from 'react-native';
+import {
+  Platform,
+  AppRegistry,
+  DeviceEventEmitter,
+  PermissionsAndroid,
+} from 'react-native';
 import {
   BackgroundRunner,
   nativeEventEmitter,
 } from './BackgroundRunnerPackage';
 import EventEmitter from 'eventemitter3';
+import { useEffect } from 'react';
+import {
+  check,
+  openSettings,
+  PERMISSIONS,
+  request,
+} from 'react-native-permissions';
+import { Linking } from 'react-native';
+import { Alert } from 'react-native';
 
 class BackgroundServer extends EventEmitter {
   constructor() {
@@ -24,6 +38,16 @@ class BackgroundServer extends EventEmitter {
 
   isRunning() {
     return this._isRunning;
+  }
+
+  async getCurrentLocation(onSuccess, onError) {
+    BackgroundRunner.getCurrentLocation()
+      .then((location) => {
+        onSuccess(location);
+      })
+      .catch((error) => {
+        onError(error);
+      });
   }
 
   async startRunnerTask(task, options) {
@@ -59,18 +83,69 @@ class BackgroundServer extends EventEmitter {
     };
   }
 
-  watchLocation() {
-    BackgroundRunner.startLocationTracking();
+  async watchLocation() {
+    await this.checkPermission(BackgroundRunner.startLocationTracking());
   }
 
   stopWatching() {
     BackgroundRunner.stopLocationTracking();
   }
 
+  trackLocation() {}
+
   async stop() {
     this._stopTask();
     await BackgroundRunner.stop();
     this._isRunning = false;
+  }
+
+  showPermissionDialog() {
+    Alert.alert(
+      'Location Permission',
+      'Allow Location Permission.',
+      [
+        {
+          text: 'Go to Settings',
+          onPress: () => Linking.openSettings(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  async checkPermission(onSuccess) {
+    try {
+      const backgroundLocationPermission =
+        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION;
+      const fineLocationPermission =
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+
+      const grantedFineLocation = await PermissionsAndroid.request(
+        fineLocationPermission
+      );
+
+      if (grantedFineLocation === PermissionsAndroid.RESULTS.GRANTED) {
+        const grantedBackgroundLocation = await PermissionsAndroid.request(
+          backgroundLocationPermission
+        );
+
+        if (grantedBackgroundLocation === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the location');
+          onSuccess && onSuccess();
+        } else {
+          this.showPermissionDialog();
+        }
+      } else {
+        this.showPermissionDialog();
+        console.log('Location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
   }
 }
 

@@ -3,6 +3,7 @@ package com.backgroundrunner.tracker;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
 
 public class FallbackLocationTracker  implements LocationTracker, LocationTracker.LocationUpdateListener {
 
@@ -24,11 +25,9 @@ public class FallbackLocationTracker  implements LocationTracker, LocationTracke
 
   public void start(){
     if(isRunning){
-      //Already running, do nothing
       return;
     }
 
-    //Start both
     gps.start(this);
     net.start(this);
     isRunning = true;
@@ -68,29 +67,32 @@ public class FallbackLocationTracker  implements LocationTracker, LocationTracke
   }
 
   public Location getPossiblyStaleLocation(){
+
     Location ret = gps.getPossiblyStaleLocation();
     if(ret == null){
       ret = net.getPossiblyStaleLocation();
     }
+//    Log.d("getLocation", ret.toString());
+
     return ret;
   }
 
   public void onUpdate(Location oldLoc, long oldTime, Location newLoc, long newTime) {
-    boolean update = false;
+    boolean update = true;
 
-    //We should update only if there is no last location, the provider is the same, or the provider is more accurate, or the old location is stale
-    if(lastLoc == null){
-      update = true;
-    }
-    else if(lastLoc != null && lastLoc.getProvider().equals(newLoc.getProvider())){
-      update = true;
-    }
-    else if(newLoc.getProvider().equals(LocationManager.GPS_PROVIDER)){
-      update = true;
-    }
-    else if (newTime - lastTime > 5 * 60 * 1000){
-      update = true;
-    }
+//    //We should update only if there is no last location, the provider is the same, or the provider is more accurate, or the old location is stale
+//    if(lastLoc == null){
+//      update = true;
+//    }
+//    else if(lastLoc != null && lastLoc.getProvider().equals(newLoc.getProvider())){
+//      update = true;
+//    }
+//    else if(newLoc.getProvider().equals(LocationManager.GPS_PROVIDER)){
+//      update = true;
+//    }
+//    else if (newTime - lastTime > 5 * 60 * 1000){
+//      update = true;
+//    }
 
     if(update){
       if(listener != null){
