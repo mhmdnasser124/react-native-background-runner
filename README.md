@@ -35,6 +35,21 @@ import Service from 'react-native-background-runner';
 
 // ...
 
+// Start watching the user's location
+Service.watchLocation();
+
+// Stop watching the user's location
+Service.stopWatching();
+
+// Listen for location update events
+DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
+
+// Get the current location
+Service.getCurrentLocation((location) => {
+  console.log('location => ', location);
+  /// your location logic here
+});
+
 const options = {
   title: 'title',
   desc: 'desc',
