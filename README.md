@@ -10,7 +10,7 @@ npm install react-native-background-runner
 
 Demo
 
-![til](./Screensshots/LocationTracker.gif)
+<img src="./Screensshots/LocationTracker.gif"/>
 
 Android only
 
