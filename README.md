@@ -8,9 +8,13 @@ background react native runner
 npm install react-native-background-runner
 ```
 
-## Demo For Location Tracker
+## Example Demo For Location Tracker
 
 ![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/LocationTracker.gif 'Location Tracker')
+
+## Demo On Live App
+
+![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/live_demo.gif 'Location Tracker')
 
 ## Android only
 
@@ -49,6 +53,12 @@ Service.getCurrentLocation((location) => {
   console.log('location => ', location);
   /// your location logic here
 });
+
+// Track location even if the app closed
+Service.startLocationTracker(
+  (location) => console.log('location=>>> ', location),
+  options
+);
 
 const options = {
   title: 'title',

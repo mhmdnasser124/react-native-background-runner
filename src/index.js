@@ -99,6 +99,46 @@ class BackgroundServer extends EventEmitter {
     this._isRunning = false;
   }
 
+  _locationTrackingService = async (taskData, callback) => {
+    let lastLocation = { longitude: 0, latitude: 0 };
+
+    await new Promise(async (resolve) => {
+      const { delay } = taskData;
+      const trackingDelay = delay || 3000;
+
+      const intervalId = setInterval(async () => {
+        if (!this._isRunning) {
+          clearInterval(intervalId);
+          resolve();
+          return;
+        }
+
+        this.getCurrentLocation(async (location) => {
+          if (
+            location.longitude !== lastLocation.longitude &&
+            location.latitude !== lastLocation.latitude
+          ) {
+            lastLocation = location;
+            callback(location);
+          }
+        });
+      }, trackingDelay);
+    });
+  };
+
+  startLocationTracker = async (callback, optionsParam) => {
+    if (!this._isRunning) {
+      try {
+        await this.startRunnerTask(async (taskData) => {
+          await this._locationTrackingService(taskData, callback);
+        }, optionsParam);
+        console.log('Successful start!');
+      } catch (e) {
+        console.log('Error', e);
+      }
+    }
+  };
+
   showPermissionDialog() {
     Alert.alert(
       'Location Permission',

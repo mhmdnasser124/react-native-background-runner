@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react'; // Import the useState hook
+import { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -7,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
   DeviceEventEmitter,
-  ToastAndroid,
 } from 'react-native';
 import Service from 'react-native-background-runner';
 
@@ -34,19 +33,6 @@ export default function App() {
 
   const handleLocationUpdate = (location) => {
     setLocation(location);
-  };
-
-  const watchCurrentLocation = async (taskData) => {
-    await new Promise(async () => {
-      const { delay } = taskData;
-      for (let i = 0; Service.isRunning(); i++) {
-        Service.getCurrentLocation((location) => {
-          console.log('location=>>> ', location);
-          setLocation(location);
-        });
-        await sleep(delay);
-      }
-    });
   };
 
   const task = async (taskData) => {
@@ -87,7 +73,12 @@ export default function App() {
       <View style={{ height: 10 }} />
       <TouchableOpacity
         style={styles.buttonTracker}
-        onPress={() => toggleBackground(watchCurrentLocation)}
+        onPress={() =>
+          Service.startLocationTracker(
+            (location) => console.log('location=>>> ', location),
+            options
+          )
+        }
       >
         <Text style={{ color: 'white', alignSelf: 'center' }}>
           Toggle Location Tracker
