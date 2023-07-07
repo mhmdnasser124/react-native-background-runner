@@ -20,7 +20,7 @@ npm install react-native-background-runner
 
 Let us not forget the mandatory strings, **`NSLocationAlwaysAndWhenInUseUsageDescription`** and **`NSLocationWhenInUseUsageDescription`** inside Our `Info.plist.` These are needed to display the permissions popup.
 
-![photo5837026843969041365](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/infoplist.PNG)
+![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/infoplist.png 'info plist')
 
 ## Android Setup
 

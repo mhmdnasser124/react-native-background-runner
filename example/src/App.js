@@ -9,10 +9,14 @@ import {
   DeviceEventEmitter,
   Platform,
   AppState,
+  LogBox,
 } from 'react-native';
 import Service from 'react-native-background-runner';
 import { NativeEventEmitter } from 'react-native';
 import { Runnable } from 'react-native-background-runner';
+
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 const sleep = (time) =>
   new Promise((resolve) => setTimeout(() => resolve(), time));
