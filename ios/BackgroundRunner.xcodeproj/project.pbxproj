@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* BackgroundRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* BackgroundRunner.m */; };
-		F4FF95D7245B92E800C19C63 /*  BackgroundRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  BackgroundRunner.swift */; };
+		780DBEA62A4478DE001EC4D2 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780DBEA52A4478DD001EC4D2 /* LocationManager.swift */; };
+		784115B32A43CB7800B6E3FD /* NotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784115B22A43CB7800B6E3FD /* NotificationCenter.swift */; };
+		7871B0372A48CA0B009D12BB /* BackgroundRunnerModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7871B0362A48CA0B009D12BB /* BackgroundRunnerModule.swift */; };
+		7871B03A2A48CA5B009D12BB /* BackgroundRunnerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 7871B0392A48CA5B009D12BB /* BackgroundRunnerModule.m */; };
+		78B1B3AA2A51C4C9005C925A /* LongProcessSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7827EFA12A51C0AC00CC3FBA /* LongProcessSimulator.swift */; };
+		78DE6A572A5878BC005F8F09 /* TaskHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78DE6A562A5878BC005F8F09 /* TaskHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,9 +29,13 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libBackgroundRunner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBackgroundRunner.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* BackgroundRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BackgroundRunner.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* BackgroundRunner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BackgroundRunner-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* BackgroundRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRunner.swift; sourceTree = "<group>"; };
+		780DBEA52A4478DD001EC4D2 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		7827EFA12A51C0AC00CC3FBA /* LongProcessSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongProcessSimulator.swift; sourceTree = "<group>"; };
+		784115B22A43CB7800B6E3FD /* NotificationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenter.swift; sourceTree = "<group>"; };
+		7871B0362A48CA0B009D12BB /* BackgroundRunnerModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRunnerModule.swift; sourceTree = "<group>"; };
+		7871B0382A48CA5B009D12BB /* BackgroundRunner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BackgroundRunner-Bridging-Header.h"; sourceTree = "<group>"; };
+		7871B0392A48CA5B009D12BB /* BackgroundRunnerModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BackgroundRunnerModule.m; sourceTree = "<group>"; };
+		78DE6A562A5878BC005F8F09 /* TaskHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,10 +60,14 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D6245B92E800C19C63 /* BackgroundRunner.swift */,
-				B3E7B5891CC2AC0600A0062D /* BackgroundRunner.m */,
-				F4FF95D5245B92E700C19C63 /* BackgroundRunner-Bridging-Header.h */,
+				78DE6A562A5878BC005F8F09 /* TaskHandler.swift */,
+				7827EFA12A51C0AC00CC3FBA /* LongProcessSimulator.swift */,
+				7871B0392A48CA5B009D12BB /* BackgroundRunnerModule.m */,
+				7871B0362A48CA0B009D12BB /* BackgroundRunnerModule.swift */,
+				780DBEA52A4478DD001EC4D2 /* LocationManager.swift */,
+				784115B22A43CB7800B6E3FD /* NotificationCenter.swift */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				7871B0382A48CA5B009D12BB /* BackgroundRunner-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,6 +102,7 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+						LastSwiftMigration = 1420;
 					};
 				};
 			};
@@ -116,8 +129,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4FF95D7245B92E800C19C63 /* BackgroundRunner.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* BackgroundRunner.m in Sources */,
+				780DBEA62A4478DE001EC4D2 /* LocationManager.swift in Sources */,
+				78DE6A572A5878BC005F8F09 /* TaskHandler.swift in Sources */,
+				7871B0372A48CA0B009D12BB /* BackgroundRunnerModule.swift in Sources */,
+				784115B32A43CB7800B6E3FD /* NotificationCenter.swift in Sources */,
+				78B1B3AA2A51C4C9005C925A /* LongProcessSimulator.swift in Sources */,
+				7871B03A2A48CA5B009D12BB /* BackgroundRunnerModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,7 +169,7 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=*]" = arm64;
+				"EXCLUDED_ARCHS[sdk=*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -172,6 +189,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "BackgroundRunner-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -203,7 +221,7 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				"EXCLUDED_ARCHS[sdk=*]" = arm64;
+				"EXCLUDED_ARCHS[sdk=*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -215,6 +233,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "BackgroundRunner-Bridging-Header.h";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -222,12 +241,16 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = BackgroundRunner;
@@ -241,12 +264,16 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = BackgroundRunner;

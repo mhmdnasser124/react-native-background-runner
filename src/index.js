@@ -1,23 +1,52 @@
 import {
   Platform,
   AppRegistry,
-  DeviceEventEmitter,
   PermissionsAndroid,
+  AppState,
 } from 'react-native';
 import {
   BackgroundRunner,
   nativeEventEmitter,
 } from './BackgroundRunnerPackage';
 import EventEmitter from 'eventemitter3';
-import { useEffect } from 'react';
-import {
-  check,
-  openSettings,
-  PERMISSIONS,
-  request,
-} from 'react-native-permissions';
+import { useEffect, useRef } from 'react';
+
 import { Linking } from 'react-native';
 import { Alert } from 'react-native';
+
+export const Runnable = ({ children }) => {
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      backgroundServer._setup();
+    }
+
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('App has come to the foreground!');
+        backgroundServer.foreground();
+      } else if (
+        appState.current === 'active' &&
+        nextAppState.match(/inactive|background/)
+      ) {
+        console.log('App has gone to the background!');
+        backgroundServer.background();
+      }
+
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  return <>{children}</>;
+};
 
 class BackgroundServer extends EventEmitter {
   constructor() {
@@ -29,11 +58,55 @@ class BackgroundServer extends EventEmitter {
     this._addListeners();
   }
 
+  _setupBackgroundListener(callback) {
+    nativeEventEmitter.addListener('BackgroundEventCallBack', (data) => {
+      callback(data);
+    });
+  }
+
+  _setup() {
+    BackgroundRunner.init();
+    BackgroundRunner.setup();
+  }
+
+  async requestAccess() {
+    try {
+      const res = await BackgroundRunner.requestAccess();
+      return res;
+    } catch (e) {
+      console.log(e.message, e.code);
+      throw e;
+    }
+  }
+
+  foreground() {
+    if (Platform.OS === 'ios') BackgroundRunner.foregroundCallBack();
+  }
+
+  background() {
+    if (Platform.OS === 'ios') BackgroundRunner.backgroundCallBack();
+  }
+
+  async _hasAccess() {
+    try {
+      const res = await BackgroundRunner.hasAccess();
+      console.log(res);
+      return res;
+    } catch (e) {
+      console.log(e.message, e.code);
+      throw e;
+    }
+  }
+
   _addListeners() {
-    nativeEventEmitter.addListener('expiration', () => this.emit('expiration'));
-    nativeEventEmitter.addListener('locationUpdate', (location) =>
-      this.emit('locationUpdate', location)
-    );
+    if (Platform.OS === 'android') {
+      nativeEventEmitter.addListener('expiration', () =>
+        this.emit('expiration')
+      );
+      nativeEventEmitter.addListener('locationUpdate', (location) =>
+        this.emit('locationUpdate', location)
+      );
+    }
   }
 
   isRunning() {
@@ -62,6 +135,21 @@ class BackgroundServer extends EventEmitter {
       await BackgroundRunner.start(this._currentOptions);
 
       this._isRunning = true;
+    } else if (Platform.OS === 'ios') {
+      console.log('Platform.OS === ios');
+      try {
+        const hasAccess = await this._hasAccess();
+        if (hasAccess) {
+          await BackgroundRunner.start();
+          this._setupBackgroundListener(task);
+          this._isRunning = true;
+        } else {
+          this.requestAccess();
+        }
+      } catch (error) {
+        this.requestAccess();
+        console.log('Error occurred:', error);
+      }
     }
   }
 
@@ -91,11 +179,13 @@ class BackgroundServer extends EventEmitter {
     BackgroundRunner.stopLocationTracking();
   }
 
-  trackLocation() {}
-
   async stop() {
     this._stopTask();
+
     await BackgroundRunner.stop();
+
+    if (Platform.OS === 'ios')
+      nativeEventEmitter.removeAllListeners('BackgroundEventCallBack');
     this._isRunning = false;
   }
 

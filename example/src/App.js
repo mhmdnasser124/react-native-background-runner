@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import {
   StyleSheet,
@@ -7,8 +7,12 @@ import {
   Text,
   TouchableOpacity,
   DeviceEventEmitter,
+  Platform,
+  AppState,
 } from 'react-native';
 import Service from 'react-native-background-runner';
+import { NativeEventEmitter } from 'react-native';
+import { Runnable } from 'react-native-background-runner';
 
 const sleep = (time) =>
   new Promise((resolve) => setTimeout(() => resolve(), time));
@@ -24,9 +28,10 @@ export default function App() {
   const [location, setLocation] = useState(0);
 
   useEffect(() => {
-    Service.watchLocation();
-
-    DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
+    if (Platform.OS !== 'ios') {
+      Service.watchLocation();
+      DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
+    }
 
     return () => {};
   }, []);
@@ -36,14 +41,18 @@ export default function App() {
   };
 
   const task = async (taskData) => {
-    await new Promise(async () => {
-      const { delay } = taskData;
-      for (let i = 0; Service.isRunning(); i++) {
-        setRunnedValue(i);
-        console.log('Runned -> ', i);
-        await sleep(delay);
-      }
-    });
+    if (Platform.OS === 'android') {
+      await new Promise(async () => {
+        const { delay } = taskData;
+        for (let i = 0; Service.isRunning(); i++) {
+          setRunnedValue(i);
+          console.log('Runned -> ', i);
+          await sleep(delay);
+        }
+      });
+    } else if (Platform.OS === 'ios') {
+      console.log('IOS task -> ', taskData);
+    }
   };
 
   const toggleBackground = async (runnerTask) => {
@@ -60,45 +69,55 @@ export default function App() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => toggleBackground(task)}
-      >
-        <Text style={{ color: 'white', alignSelf: 'center' }}>
-          Toggle Background Service
-        </Text>
-      </TouchableOpacity>
-      <View style={{ height: 10 }} />
-      <TouchableOpacity
-        style={styles.buttonTracker}
-        onPress={() =>
-          Service.startLocationTracker(
-            (location) => console.log('location=>>> ', location),
-            options
-          )
-        }
-      >
-        <Text style={{ color: 'white', alignSelf: 'center' }}>
-          Toggle Location Tracker
-        </Text>
-      </TouchableOpacity>
+  ///"Note: This is specifically designed for Android devices."
+  const renderLocationTracker = () =>
+    Platform.OS === 'android' && (
+      <>
+        <View style={{ height: 10 }} />
+        <TouchableOpacity
+          style={styles.buttonTracker}
+          onPress={() =>
+            Service.startLocationTracker(
+              (location) => console.log('location=>>> ', location),
+              options
+            )
+          }
+        >
+          <Text style={{ color: 'white', alignSelf: 'center' }}>
+            Toggle Location Tracker
+          </Text>
+        </TouchableOpacity>
 
-      <View style={{}}>
-        <Text style={styles.runnedValue}>{`Runned -> ${runnedValue}`}</Text>
+        <View style={{}}>
+          <Text style={styles.runnedValue}>{`Runned -> ${runnedValue}`}</Text>
+        </View>
+        <View style={{}}>
+          <Text
+            style={styles.runnedValue}
+          >{`latitude -> ${location.latitude}`}</Text>
+        </View>
+        <View style={{}}>
+          <Text
+            style={styles.runnedValue}
+          >{`longitude -> ${location.longitude}`}</Text>
+        </View>
+      </>
+    );
+
+  return (
+    <Runnable>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => toggleBackground(task)}
+        >
+          <Text style={{ color: 'white', alignSelf: 'center' }}>
+            Toggle Background Service
+          </Text>
+        </TouchableOpacity>
+        {renderLocationTracker()}
       </View>
-      <View style={{}}>
-        <Text
-          style={styles.runnedValue}
-        >{`latitude -> ${location.latitude}`}</Text>
-      </View>
-      <View style={{}}>
-        <Text
-          style={styles.runnedValue}
-        >{`longitude -> ${location.longitude}`}</Text>
-      </View>
-    </View>
+    </Runnable>
   );
 }
 
