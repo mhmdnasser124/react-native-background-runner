@@ -8,21 +8,32 @@ background react native runner
 npm install react-native-background-runner
 ```
 
-## Example Demo For Location Tracker
+## Demo
+
+### Demo Ios Background Task
+
+![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/ios_background_runner.gif 'Ios Background Runner')
+
+#### Demo For Location Tracker (ANDROID ONLY)
 
 ![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/LocationTracker.gif 'Location Tracker')
 
-## Demo On Live App
+#### Demo On Live App
 
 ![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/live_demo.gif 'Location Tracker')
 
-## IOS Setup
+### IOS Setup
 
-Let us not forget the mandatory strings, **`NSLocationAlwaysAndWhenInUseUsageDescription`** and **`NSLocationWhenInUseUsageDescription`** inside Our `Info.plist.` These are needed to display the permissions popup.
+Let us not forget the mandatory strings
+**`NSLocationAlwaysAndWhenInUseUsageDescription`** and **`NSLocationWhenInUseUsageDescription`** inside Our `Info.plist.` These are needed to display the permissions popup.
 
 ![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/infoplist.png 'info plist')
 
-## Android Setup
+set the right capabilities for app
+
+![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/capabilities.png 'capabilities')
+
+### Android Setup
 
 Add the following code to android/app/src/main/AndroidManifest.xml:
 

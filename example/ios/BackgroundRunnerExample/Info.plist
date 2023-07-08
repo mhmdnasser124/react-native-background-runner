@@ -35,14 +35,17 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSLocationWhenInUseUsageDescription - 2</key>
+	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>location</string>
 		<string>processing</string>
-		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -58,9 +61,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
-	<key>NSLocationWhenInUseUsageDescription - 2</key>
-	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 </dict>
 </plist>
