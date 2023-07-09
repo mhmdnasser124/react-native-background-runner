@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Platform,
   AppRegistry,
@@ -9,18 +10,62 @@ import {
   nativeEventEmitter,
 } from './BackgroundRunnerPackage';
 import EventEmitter from 'eventemitter3';
-import { useEffect, useRef } from 'react';
-
 import { Linking } from 'react-native';
 import { Alert } from 'react-native';
 
-export const Runnable = ({ children }) => {
-  const appState = useRef(AppState.currentState);
-
-  useEffect(() => {
+/**
+ * Wrapper function for iOS-specific functionality.
+ * @param {Function} fn - The function to be wrapped.
+ * @returns {Function} - The wrapped function.
+ */
+function IOSWrapper(fn) {
+  return function () {
     if (Platform.OS === 'ios') {
-      backgroundServer._setup();
+      return fn.apply(this, arguments);
     }
+  };
+}
+
+/**
+ * Wrapper function for Android-specific functionality.
+ * @param {Function} fn - The function to be wrapped.
+ * @returns {Function} - The wrapped function.
+ */
+function AndroidWrapper(fn) {
+  return function () {
+    if (Platform.OS === 'android') {
+      return fn.apply(this, arguments);
+    }
+  };
+}
+
+/**
+ * Wraps the specified functions of an object with the given wrapper function.
+ * @param {Object} target - The target object.
+ * @param {string[]} functionNames - The names of the functions to be wrapped.
+ * @param {Function} wrapper - The wrapper function.
+ */
+function wrapFunctions(target, functionNames, wrapper) {
+  for (const functionName of functionNames) {
+    if (
+      target.hasOwnProperty(functionName) &&
+      typeof target[functionName] === 'function'
+    ) {
+      target[functionName] = wrapper(target[functionName]);
+    }
+  }
+}
+
+/**
+ * Component that sets up the background server and handles app state changes.
+ * @param {Object} props - The component props.
+ * @returns {JSX.Element} - The component's rendered elements.
+ */
+export const Runnable = ({ children }) => {
+  const appState = React.useRef(AppState.currentState);
+
+  React.useEffect(() => {
+    backgroundServer._setup();
 
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (
@@ -48,6 +93,9 @@ export const Runnable = ({ children }) => {
   return <>{children}</>;
 };
 
+/**
+ * BackgroundServer class for running background tasks and tracking location.
+ */
 class BackgroundServer extends EventEmitter {
   constructor() {
     super();
@@ -58,17 +106,33 @@ class BackgroundServer extends EventEmitter {
     this._addListeners();
   }
 
+  /**
+   * Set up the background server on iOS.
+   * This method should be called before using other methods on iOS.
+   */
+  // [iOS]
+  _setup() {
+    BackgroundRunner.init();
+    BackgroundRunner.setup();
+  }
+
+  /**
+   * Set up a listener for background events.
+   * @param {Function} callback - The callback function to be called when a background event occurs.
+   */
+  // [iOS]
   _setupBackgroundListener(callback) {
     nativeEventEmitter.addListener('BackgroundEventCallBack', (data) => {
       callback(data);
     });
   }
 
-  _setup() {
-    BackgroundRunner.init();
-    BackgroundRunner.setup();
-  }
-
+  /**
+   * Request access to run background tasks.
+   * @returns {Promise} - A promise that resolves with the result of the request.
+   * @throws {Error} - If an error occurs during the request.
+   */
+  // [iOS]
   async requestAccess() {
     try {
       const res = await BackgroundRunner.requestAccess();
@@ -79,14 +143,28 @@ class BackgroundServer extends EventEmitter {
     }
   }
 
+  /**
+   * Called when the app comes to the foreground.
+   */
+  // [iOS]
   foreground() {
-    if (Platform.OS === 'ios') BackgroundRunner.foregroundCallBack();
+    BackgroundRunner.foregroundCallBack();
   }
 
+  /**
+   * Called when the app goes to the background.
+   */
+  // [iOS]
   background() {
-    if (Platform.OS === 'ios') BackgroundRunner.backgroundCallBack();
+    BackgroundRunner.backgroundCallBack();
   }
 
+  /**
+   * Check if the app has access to run background tasks.
+   * @returns {Promise} - A promise that resolves with the result of the check.
+   * @throws {Error} - If an error occurs during the check.
+   */
+  // [iOS]
   async _hasAccess() {
     try {
       const res = await BackgroundRunner.hasAccess();
@@ -98,21 +176,30 @@ class BackgroundServer extends EventEmitter {
     }
   }
 
+  /**
+   * Add event listeners for background events.
+   */
   _addListeners() {
-    if (Platform.OS === 'android') {
-      nativeEventEmitter.addListener('expiration', () =>
-        this.emit('expiration')
-      );
-      nativeEventEmitter.addListener('locationUpdate', (location) =>
-        this.emit('locationUpdate', location)
-      );
-    }
+    nativeEventEmitter.addListener('expiration', () => this.emit('expiration'));
+    nativeEventEmitter.addListener('locationUpdate', (location) =>
+      this.emit('locationUpdate', location)
+    );
   }
 
+  /**
+   * Check if the background server is running.
+   * @returns {boolean} - `true` if the server is running, `false` otherwise.
+   */
   isRunning() {
     return this._isRunning;
   }
 
+  /**
+   * Get the current device location.
+   * @param {Function} onSuccess - Success callback function that receives the location.
+   * @param {Function} onError - Error callback function that receives the error.
+   */
+  // [ANDROID]
   async getCurrentLocation(onSuccess, onError) {
     BackgroundRunner.getCurrentLocation()
       .then((location) => {
@@ -123,6 +210,11 @@ class BackgroundServer extends EventEmitter {
       });
   }
 
+  /**
+   * Start a background runner task.
+   * @param {Function} task - The task to be executed in the background.
+   * @param {Object} options - Additional options for the task.
+   */
   async startRunnerTask(task, options) {
     this._runnedTasks++;
     this._currentOptions = this._normalizeOptions(options);
@@ -136,7 +228,6 @@ class BackgroundServer extends EventEmitter {
 
       this._isRunning = true;
     } else if (Platform.OS === 'ios') {
-      console.log('Platform.OS === ios');
       try {
         const hasAccess = await this._hasAccess();
         if (hasAccess) {
@@ -153,6 +244,12 @@ class BackgroundServer extends EventEmitter {
     }
   }
 
+  /**
+   * Generate a task function for the background runner.
+   * @param {Function} task - The task function to be executed.
+   * @param {Object} parameters - Additional parameters for the task.
+   * @returns {Function} - The generated task function.
+   */
   _generateTask(task, parameters) {
     const self = this;
     return async () => {
@@ -163,6 +260,11 @@ class BackgroundServer extends EventEmitter {
     };
   }
 
+  /**
+   * Normalize the options for a background runner task.
+   * @param {Object} options - The task options.
+   * @returns {Object} - The normalized options.
+   */
   _normalizeOptions(options) {
     return {
       taskName: options.title + this._runnedTasks,
@@ -171,14 +273,25 @@ class BackgroundServer extends EventEmitter {
     };
   }
 
+  /**
+   * Watch the device location continuously and call the callback on location updates.
+   */
+  // [ANDROID]
   async watchLocation() {
     await this.checkPermission(BackgroundRunner.startLocationTracking());
   }
 
+  /**
+   * Stop watching the device location.
+   */
+  // [ANDROID]
   stopWatching() {
     BackgroundRunner.stopLocationTracking();
   }
 
+  /**
+   * Stop the background runner and the currently running task.
+   */
   async stop() {
     this._stopTask();
 
@@ -189,7 +302,13 @@ class BackgroundServer extends EventEmitter {
     this._isRunning = false;
   }
 
-  _locationTrackingService = async (taskData, callback) => {
+  /**
+   * Background task function for location tracking.
+   * @param {Object} taskData - The task data.
+   * @param {Function} callback - The callback function to be called on location updates.
+   */
+  // [ANDROID]
+  async locationTrackingService(taskData, callback) {
     let lastLocation = { longitude: 0, latitude: 0 };
 
     await new Promise(async (resolve) => {
@@ -214,21 +333,33 @@ class BackgroundServer extends EventEmitter {
         });
       }, trackingDelay);
     });
-  };
+  }
 
-  startLocationTracker = async (callback, optionsParam) => {
+  /**
+   * Start the location tracker task.
+   * @param {Function} callback - The callback function to be called on location updates.
+   * @param {Object} optionsParam - Additional options for the location tracker.
+   */
+  // [ANDROID]
+  startLocationTracker(callback, optionsParam) {
     if (!this._isRunning) {
-      try {
-        await this.startRunnerTask(async (taskData) => {
-          await this._locationTrackingService(taskData, callback);
-        }, optionsParam);
-        console.log('Successful start!');
-      } catch (e) {
-        console.log('Error', e);
-      }
+      const self = this;
+      this.startRunnerTask(async function (taskData) {
+        await self.locationTrackingService(taskData, callback);
+      }, optionsParam)
+        .then(() => {
+          console.log('Successful start!');
+        })
+        .catch((e) => {
+          console.log('Error', e);
+        });
     }
-  };
+  }
 
+  /**
+   * Show a permission dialog for location access.
+   */
+  // [ANDROID]
   showPermissionDialog() {
     Alert.alert(
       'Location Permission',
@@ -247,6 +378,11 @@ class BackgroundServer extends EventEmitter {
     );
   }
 
+  /**
+   * Check if the app has location permission and request it if not granted.
+   * @param {Function} onSuccess - Success callback function to be called when permission is granted.
+   */
+  // [ANDROID]
   async checkPermission(onSuccess) {
     try {
       const backgroundLocationPermission =
@@ -279,6 +415,29 @@ class BackgroundServer extends EventEmitter {
   }
 }
 
+// Wrap iOS-specific methods with the IOSWrapper
+const iosWrappedFunctions = [
+  '_setup',
+  'requestAccess',
+  'foreground',
+  '_hasAccess',
+  'background',
+];
+wrapFunctions(BackgroundServer.prototype, iosWrappedFunctions, IOSWrapper);
+
+// Wrap Android-specific methods with the AndroidWrapper
+const androidWrappedFunctions = [
+  '_addListeners',
+  'startLocationTracker',
+  'getCurrentLocation',
+];
+wrapFunctions(
+  BackgroundServer.prototype,
+  androidWrappedFunctions,
+  AndroidWrapper
+);
+
+// Create an instance of BackgroundServer
 const backgroundServer = new BackgroundServer();
 
 export default backgroundServer;
