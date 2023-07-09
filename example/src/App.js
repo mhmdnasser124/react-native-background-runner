@@ -75,7 +75,7 @@ export default function App() {
 
   ///"Note: This is specifically designed for Android devices."
   const renderLocationTracker = () =>
-    Platform.OS === 'android' && (
+    false && (
       <>
         <View style={{ height: 10 }} />
         <TouchableOpacity
