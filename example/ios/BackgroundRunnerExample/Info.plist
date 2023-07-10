@@ -38,8 +38,6 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
-	<key>NSLocationWhenInUseUsageDescription - 2</key>
 	<string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 	<key>UIBackgroundModes</key>
 	<array>
