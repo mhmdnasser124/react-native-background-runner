@@ -430,6 +430,8 @@ const androidWrappedFunctions = [
   '_addListeners',
   'startLocationTracker',
   'getCurrentLocation',
+  'watchLocation',
+  'stopWatching',
 ];
 wrapFunctions(
   BackgroundServer.prototype,

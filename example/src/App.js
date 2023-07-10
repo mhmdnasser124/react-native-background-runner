@@ -32,10 +32,10 @@ export default function App() {
   const [location, setLocation] = useState(0);
 
   useEffect(() => {
-    if (Platform.OS !== 'ios') {
-      Service.watchLocation();
+    Service.watchLocation();
+
+    if (Platform.OS !== 'ios')
       DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
-    }
 
     return () => {};
   }, []);

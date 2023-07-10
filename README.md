@@ -70,9 +70,9 @@ npm install react-native-background-runner
 Let us not forget the mandatory strings
 **`NSLocationAlwaysAndWhenInUseUsageDescription`** and **`NSLocationWhenInUseUsageDescription`** inside Our `Info.plist.` These are needed to display the permissions popup.
 ```diff
-+ <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
++   <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 +	  <string>App Uses Location Services to allow background operations while performing long running tasks,  this insures data integrity on our side, and offers a better user experience</string>
-+	<key>NSLocationWhenInUseUsageDescription</key>
++	  <key>NSLocationWhenInUseUsageDescription</key>
 +	  <string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
 ```
 
@@ -102,53 +102,44 @@ After adding the code to the AndroidManifest.xml file, save the changes and cont
 
 &nbsp;
 ## Usage
+### Wrapper Component
+To handle the lifecycle of your app, use the Runnable wrapper component. Place your app component within the Runnable component as follows:
 
 ```js
-import Service from 'react-native-background-runner';
+<Runnable>
+  {/* Your app component */}
+</Runnable>
+```
 
-// ...
+&nbsp;
 
-// Start watching the user's location
-Service.watchLocation();
+### Background Task
+**To perform a background task, follow these steps:**
 
-// Stop watching the user's location
-Service.stopWatching();
-
-// Listen for location update events
-DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
-
-// Get the current location
-Service.getCurrentLocation((location) => {
-  console.log('location => ', location);
-  /// your location logic here
-});
-
-// Track location even if the app closed
-Service.startLocationTracker(
-  (location) => console.log('location=>>> ', location),
-  options
-);
-
-const options = {
-  title: 'title',
-  desc: 'desc',
-  delay: 1000,
-};
-
+- Define an asynchronous task function that takes taskData as a parameter. This function can have different implementations based on the platform.
+```javascript
 const task = async (taskData) => {
-  await new Promise(async (resolve) => {
-    const { delay } = taskData;
-    for (let counter = 0; Service.isRunning(); counter++) {
-      console.log('Task is running ', counter);
-      await sleep(delay);
-    }
-  });
+  if (Platform.OS === 'android') {
+    await new Promise(async () => {
+      const { delay } = taskData;
+      for (let i = 0; Service.isRunning(); i++) {
+        setRunnedValue(i);
+        console.log('Runned -> ', i);
+        await sleep(delay);
+      }
+    });
+  } else if (Platform.OS === 'ios') {
+    console.log('IOS task -> ', taskData);
+  }
 };
+```
 
-const StartBackgroundService = async () => {
+- Use the toggleBackground function to control the background task. It checks if the background service is running and either starts or stops it accordingly.
+```javascript
+const toggleBackground = async (runnerTask) => {
   if (!Service.isRunning()) {
     try {
-      await Service.startRunnerTask(task, options);
+      await Service.startRunnerTask(runnerTask, options);
       console.log('Successful start!');
     } catch (e) {
       console.log('Error', e);
@@ -159,6 +150,43 @@ const StartBackgroundService = async () => {
   }
 };
 ```
+Call **`toggleBackground(task)`** to start or stop the background task.
+
+&nbsp;
+
+### Location Tracker
+For now, the location tracker only supports **`Android`**. Use the following methods to work with the location tracker:
+
+- Start watching the user's location:
+```javascript
+Service.watchLocation();
+```
+- Stop watching the user's location:
+```javascript
+Service.stopWatching();
+```
+
+- Listen for location update events:
+```javascript
+DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
+```
+
+- Get the current location:
+```javascript
+Service.getCurrentLocation((location) => {
+  console.log('location => ', location);
+  // Your location logic here
+});
+```
+- Track location even if the app is closed:
+```javascript
+Service.startLocationTracker(
+  (location) => console.log('location =>>> ', location),
+  options
+);
+```
+>**⚠️ Please note that the location tracker is currently only supported on Android.**
+
 &nbsp;
 
 ## License
