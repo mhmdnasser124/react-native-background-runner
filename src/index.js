@@ -341,18 +341,17 @@ class BackgroundServer extends EventEmitter {
    * @param {Object} optionsParam - Additional options for the location tracker.
    */
   // [ANDROID]
-  startLocationTracker(callback, optionsParam) {
+  async startLocationTracker(callback, optionsParam) {
     if (!this._isRunning) {
       const self = this;
-      this.startRunnerTask(async function (taskData) {
-        await self.locationTrackingService(taskData, callback);
-      }, optionsParam)
-        .then(() => {
-          console.log('Successful start!');
-        })
-        .catch((e) => {
-          console.log('Error', e);
-        });
+      try {
+        await this.startRunnerTask(async (taskData) => {
+          await this.locationTrackingService(taskData, callback);
+        }, optionsParam);
+        console.log('Successful start!');
+      } catch (e) {
+        console.log('Error', e);
+      }
     }
   }
 
