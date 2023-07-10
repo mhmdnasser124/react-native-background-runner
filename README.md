@@ -20,9 +20,10 @@ npm install react-native-background-runner
 
 ## Preview
 
-|                                                                            **Android**                                                                            |                                                                          **iOS**                                                                          |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img alt='demo-android' src='https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/android-background-runner.gif' height="800" /> | <img alt='demo-ios' src='https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/ios_background_runner.gif' height="800" /> |
+|  Platform   |                                                                               Demo                                                                                |
+| :---------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------: | ------------------- |
+|   **IOS**   |     <img alt='demo-ios' src='https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/ios_background_runner.gif' height="200" />     | <img alt='demo-ios' |
+| **Android** | <img alt='demo-android' src='https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/android-background-runner.gif' height="200" /> |
 
 ## Demo-For-Location-Tracker-(ANDROID-ONLY)
 
