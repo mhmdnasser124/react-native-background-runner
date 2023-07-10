@@ -1,9 +1,9 @@
 {
-  "name": "react-native-background-runner",
-  "version": "1.0.14",
-  "description": "test",
+  "name": "react-native-background-executor",
+  "version": "1.0.26",
+  "description": "With react-native-background-runner, you can now overcome background limitations and enhance the user experience of your cross-platform applications.",
   "main": "lib/commonjs/index",
-  "module": "lib/module/index",
+  "module": "lib/modue/index",
   "types": "lib/typescript/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
