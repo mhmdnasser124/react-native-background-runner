@@ -69,6 +69,12 @@ npm install react-native-background-runner
 
 Let us not forget the mandatory strings
 **`NSLocationAlwaysAndWhenInUseUsageDescription`** and **`NSLocationWhenInUseUsageDescription`** inside Our `Info.plist.` These are needed to display the permissions popup.
+```diff
++ <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
++	  <string>App Uses Location Services to allow background operations while performing long running tasks,  this insures data integrity on our side, and offers a better user experience</string>
++	<key>NSLocationWhenInUseUsageDescription</key>
++	  <string>App Uses Location Services to allow background operations while performing long running tasks, this insures data integrity on our side, and offers a better user experience</string>
+```
 
 ![alt text](https://github.com/mhmdnasser124/react-native-background-runner/blob/main/Screenshots/infoplist.png 'info plist')
 
