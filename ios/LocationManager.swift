@@ -158,11 +158,51 @@ extension LocationManager: CLLocationManagerDelegate {
         }
     }
     
+    func startTrackingLocation(completion: @escaping (CLLocationCoordinate2D?, Error?) -> Void) {
+           manager.desiredAccuracy = kCLLocationAccuracyBest
+           
+           if CLLocationManager.locationServicesEnabled() {
+               manager.requestWhenInUseAuthorization()
+               
+               manager.startUpdatingLocation()
+               
+               if let currentLocation = manager.location?.coordinate {
+                   completion(currentLocation, nil)
+               } else {
+                   let error = NSError(domain: "LocationManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve location."])
+                   completion(nil, error)
+               }
+           } else {
+               let error = NSError(domain: "LocationManager", code: 2, userInfo: [NSLocalizedDescriptionKey: "Location services are disabled."])
+               completion(nil, error)
+           }
+       }
+    
+    func getCoordinatesWithHighAccuracy(completion: @escaping (CLLocationCoordinate2D?, Error?) -> Void) {
+        
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        if CLLocationManager.locationServicesEnabled() {
+          
+            manager.startUpdatingLocation()
+            
+            if let currentLocation = manager.location?.coordinate {
+                completion(currentLocation, nil)
+            } else {
+                let error = NSError(domain: "LocationManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve location."])
+                completion(nil, error)
+            }
+        } else {
+            let error = NSError(domain: "LocationManager", code: 2, userInfo: [NSLocalizedDescriptionKey: "Location services are disabled."])
+            completion(nil, error)
+        }
+    }
+
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("in location manager delegate")
         NotificationCenterManager.shared.post(event: .LocationUpdate, userInfo: ["locations": locations, "state": self.state])
     }
+    
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
@@ -173,7 +213,6 @@ extension LocationManager: CLLocationManagerDelegate {
             // User has denied or restricted location access
             handleLocationAccess(false)
         default:
-            // Handle other authorization statuses if needed
             break
         }
     }

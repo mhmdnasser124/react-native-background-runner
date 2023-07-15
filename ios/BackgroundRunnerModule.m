@@ -23,6 +23,8 @@ _RCT_EXTERN_REMAP_METHOD(stop, stopSim, false)
 
 _RCT_EXTERN_REMAP_METHOD(setup, setupNotificationCenterManager, false)
 
+//_RCT_EXTERN_REMAP_METHOD(getCurrentLocation, getCoordinates, false)
+
 _RCT_EXTERN_REMAP_METHOD(backgroundCallBack, enteredBackground, false)
 
 _RCT_EXTERN_REMAP_METHOD(foregroundCallBack, enteredForeground, false)

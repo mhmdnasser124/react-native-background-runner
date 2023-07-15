@@ -83,7 +83,6 @@ class BackgroundRunnerService: RCTEventEmitter {
     }
     
     
-    
     @objc
     func decrement(
         _ resolve: RCTPromiseResolveBlock,
@@ -146,6 +145,23 @@ class BackgroundRunnerService: RCTEventEmitter {
     }
     
     @objc
+    func getCoordinates() {
+        print("getCoordinates in =>>>> ")
+        LocationManager.shared.getCoordinatesWithHighAccuracy { (coordinates, error) in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                self.sendLocationEvent(CLLocation(), error: error) // call sendLocationEvent method with error parameter
+                // Handle the error
+            } else if let coordinates = coordinates {
+                let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+                print("Latitude: \(coordinates.latitude), Longitude: \(coordinates.longitude)")
+                self.sendLocationEvent(location) // call sendLocationEvent method with location parameter
+                // Use the latitude and longitude values as needed
+            }
+        }
+    }
+    
+    @objc
     func stopSim() {
         guard self.isSimulating() else {
             /// error: No task running
@@ -162,8 +178,18 @@ class BackgroundRunnerService: RCTEventEmitter {
     }
     
     override func supportedEvents() -> [String] {
-        return ["BackgroundEventCallBack"]
+        return ["BackgroundEventCallBack", "location"]
     }
+  
+    func sendLocationEvent(_ location: CLLocation, error: Error? = nil) {
+        var body: [String: Any] = ["latitude": location.coordinate.latitude,
+                                   "longitude": location.coordinate.longitude]
+        if let error = error {
+            body["error"] = error.localizedDescription
+        }
+        sendEvent(withName: "location", body: body)
+    }
+    
     
     func simluationTick(progress: Int64, total: Int64, isDone: Bool
                         

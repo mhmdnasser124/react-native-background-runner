@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
-
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,15 +7,16 @@ import {
   TouchableOpacity,
   DeviceEventEmitter,
   Platform,
-  AppState,
+  ToastAndroid,
   LogBox,
+  Alert,
+  PermissionsAndroid,
 } from 'react-native';
 import Service from 'react-native-background-runner';
-import { NativeEventEmitter } from 'react-native';
 import { Runnable } from 'react-native-background-runner';
 
-LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
-LogBox.ignoreAllLogs(); //Ignore all log notifications
+LogBox.ignoreLogs(['Warning: ...']);
+LogBox.ignoreAllLogs();
 
 const sleep = (time) =>
   new Promise((resolve) => setTimeout(() => resolve(), time));
@@ -29,9 +29,13 @@ const options = {
 
 export default function App() {
   const [runnedValue, setRunnedValue] = useState(0);
-  const [location, setLocation] = useState(0);
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [locationPermission, setLocationPermission] = useState(false);
+  const [running, setTaskRunning] = useState(Service.isRunning());
 
   useEffect(() => {
+    checkLocationPermission();
+
     Service.watchLocation();
 
     if (Platform.OS !== 'ios')
@@ -40,8 +44,39 @@ export default function App() {
     return () => {};
   }, []);
 
+  useEffect(() => {
+    if (!locationPermission) {
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Location permission required', ToastAndroid.LONG);
+      } else if (Platform.OS === 'ios') {
+        Alert.alert(
+          'Location Permission Required',
+          'Please grant location permission to proceed.',
+          [
+            {
+              text: 'Grant Location',
+              onPress: () => {
+                Service.requestAccess();
+                setLocationPermission(true);
+              },
+            },
+          ]
+        );
+      }
+    }
+  }, [locationPermission]);
+
   const handleLocationUpdate = (location) => {
     setLocation(location);
+  };
+
+  const checkLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      setLocationPermission(granted);
+    }
   };
 
   const task = async (taskData) => {
@@ -63,17 +98,18 @@ export default function App() {
     if (!Service.isRunning()) {
       try {
         await Service.startRunnerTask(runnerTask, options);
+        setTaskRunning(true);
         console.log('Successful start!');
       } catch (e) {
         console.log('Error', e);
       }
     } else {
       console.log('Stop background service');
+      setTaskRunning(false);
       await Service.stop();
     }
   };
 
-  ///"Note: This is specifically designed for Android devices."
   const renderLocationTracker = () =>
     Platform.OS === 'android' && (
       <>
@@ -116,7 +152,7 @@ export default function App() {
           onPress={() => toggleBackground(task)}
         >
           <Text style={{ color: 'white', alignSelf: 'center' }}>
-            Toggle Background Service
+            {running ? 'Stop' : 'Start Background Service'}
           </Text>
         </TouchableOpacity>
         {renderLocationTracker()}

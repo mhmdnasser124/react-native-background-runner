@@ -66,6 +66,7 @@ export const Runnable = ({ children }) => {
 
   React.useEffect(() => {
     backgroundServer._setup();
+    backgroundServer._setUpLocationListener();
 
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (
@@ -124,6 +125,18 @@ class BackgroundServer extends EventEmitter {
   _setupBackgroundListener(callback) {
     nativeEventEmitter.addListener('BackgroundEventCallBack', (data) => {
       callback(data);
+    });
+  }
+
+  /**
+   * Set up a listener for Location events.
+   * @param {Function} callback - The callback function to be called when a Location event occurs.
+   */
+  // [iOS]
+  _setUpLocationListener() {
+    nativeEventEmitter.addListener('location', (data) => {
+      // callback(data);
+      console.log('location=>> ', data);
     });
   }
 
@@ -201,13 +214,19 @@ class BackgroundServer extends EventEmitter {
    */
   // [ANDROID]
   async getCurrentLocation(onSuccess, onError) {
-    BackgroundRunner.getCurrentLocation()
-      .then((location) => {
-        onSuccess(location);
-      })
-      .catch((error) => {
-        onError(error);
-      });
+    if (Platform.OS === 'android') {
+      BackgroundRunner.getCurrentLocation()
+        .then((location) => {
+          onSuccess(location);
+        })
+        .catch((error) => {
+          onError(error);
+        });
+    }
+  }
+
+  getLocation(onLocation) {
+    BackgroundRunner.getCurrentLocation();
   }
 
   /**
