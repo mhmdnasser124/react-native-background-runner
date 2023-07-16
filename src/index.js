@@ -250,8 +250,8 @@ class BackgroundServer extends EventEmitter {
       try {
         const hasAccess = await this._hasAccess();
         if (hasAccess) {
-          await BackgroundRunner.start();
-          this._setupBackgroundListener(task);
+          const { delay } = options;
+          await BackgroundRunner.startLongProcess(task);
           this._isRunning = true;
         } else {
           this.requestAccess();

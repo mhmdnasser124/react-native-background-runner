@@ -63,7 +63,20 @@ extension LongProcessSimulator {
 }
 
 extension LongProcessSimulator {
-    func tick(withInterval interval: TimeInterval = 1.0, block: @escaping TickBlock) -> JobId {
+    func tick(withDelay delay: TimeInterval,_ callback: @escaping RCTResponseSenderBlock) -> JobId {
+        let id = newJob()
+        let queue = DispatchQueue(label: "LongProcessJob \(id)")
+        
+        queue.async {
+            let delayParam: [String: Any] = ["delay": delay]
+            callback([delayParam])
+        }
+        
+        return id
+    }
+    
+    
+    func tickSimulate(withInterval interval: TimeInterval = 1.0, block: @escaping TickBlock) -> JobId {
         let id = newJob()
         // create new queue
         let queue = DispatchQueue(label: "LongProcessJob \(id)")

@@ -1,6 +1,6 @@
 {
   "name": "react-native-background-runner",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "description": "With react-native-background-runner, you can now overcome background limitations and enhance the user experience of your cross-platform applications.",
   "main": "lib/commonjs/index",
   "module": "lib/modue/index",

@@ -80,18 +80,14 @@ export default function App() {
   };
 
   const task = async (taskData) => {
-    if (Platform.OS === 'android') {
-      await new Promise(async () => {
-        const { delay } = taskData;
-        for (let i = 0; Service.isRunning(); i++) {
-          setRunnedValue(i);
-          console.log('Runned -> ', i);
-          await sleep(delay);
-        }
-      });
-    } else if (Platform.OS === 'ios') {
-      console.log('IOS task -> ', taskData);
-    }
+    await new Promise(async () => {
+      const { delay } = taskData;
+      for (let i = 0; Service.isRunning(); i++) {
+        setRunnedValue(i);
+        console.log('Runned -> ', i);
+        await sleep(delay);
+      }
+    });
   };
 
   const toggleBackground = async (runnerTask) => {

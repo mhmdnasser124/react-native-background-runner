@@ -118,8 +118,7 @@ To handle the lifecycle of your app, use the Runnable wrapper component. Place y
 
 - Define an asynchronous task function that takes taskData as a parameter. This function can have different implementations based on the platform.
 ```javascript
-const task = async (taskData) => {
-  if (Platform.OS === 'android') {
+  const task = async (taskData) => {
     await new Promise(async () => {
       const { delay } = taskData;
       for (let i = 0; Service.isRunning(); i++) {
@@ -128,10 +127,7 @@ const task = async (taskData) => {
         await sleep(delay);
       }
     });
-  } else if (Platform.OS === 'ios') {
-    console.log('IOS task -> ', taskData);
-  }
-};
+  };
 ```
 
 - Use the toggleBackground function to control the background task. It checks if the background service is running and either starts or stops it accordingly.

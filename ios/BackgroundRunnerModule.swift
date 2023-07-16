@@ -50,10 +50,12 @@ class BackgroundRunnerService: RCTEventEmitter {
         }
     }
     
-    
+//    _ delay: NSNumber,
     @objc
-    func startLongProcess() {
-        self.startSim()
+    func startLongProcess(_ callback: @escaping RCTResponseSenderBlock) {
+//        let delayInterval = TimeInterval(delay.doubleValue / 1000)
+        
+        self.startSim(withDelay: 1000, callback)
     }
     
     @objc
@@ -129,18 +131,20 @@ class BackgroundRunnerService: RCTEventEmitter {
         }
     }
     
-    func startSim() {
+    func startSim(withDelay delay: TimeInterval, _ callback: @escaping RCTResponseSenderBlock) {
         guard !self.isSimulating() else {
             /// error:  Task already running
             return
         }
         let lpSim = LongProcessSimulator.shared
         
+        //    withInterval: 1.5,
+        //    block: { progress, total, isDone in
+        //        return self.simluationTick(progress: progress, total: total, isDone: isDone)
+        //    }
         self.longTaskdId = lpSim.tick(
-            withInterval: 1.5,
-            block: { progress, total, isDone in
-                return self.simluationTick(progress: progress, total: total, isDone: isDone)
-            }
+            withDelay: delay,
+            callback
         )
     }
     
@@ -180,7 +184,7 @@ class BackgroundRunnerService: RCTEventEmitter {
     override func supportedEvents() -> [String] {
         return ["BackgroundEventCallBack", "location"]
     }
-  
+    
     func sendLocationEvent(_ location: CLLocation, error: Error? = nil) {
         var body: [String: Any] = ["latitude": location.coordinate.latitude,
                                    "longitude": location.coordinate.longitude]
@@ -197,7 +201,7 @@ class BackgroundRunnerService: RCTEventEmitter {
         
         let tickData = ["ticks": "\(progress)"]
         
-        sendEvent(withName: "BackgroundEventCallBack", body: tickData)
+        //        sendEvent(withName: "BackgroundEventCallBack", body: tickData)
         
         if isDone {
             self.longTaskdId = nil

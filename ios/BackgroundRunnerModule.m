@@ -13,7 +13,7 @@
 
 _RCT_EXTERN_REMAP_METHOD(inc, increment, false)
 
-_RCT_EXTERN_REMAP_METHOD(start, startLongProcess, false)
+//_RCT_EXTERN_REMAP_METHOD(start, startLongProcess, false)
 
 _RCT_EXTERN_REMAP_METHOD(init, registerTask, false)
 
@@ -33,7 +33,12 @@ _RCT_EXTERN_REMAP_METHOD(foregroundCallBack, enteredForeground, false)
 
 RCT_EXTERN_METHOD(getCount: (RCTResponseSenderBlock)callback)
 
-//RCT_EXTERN_METHOD(startLongProcess: (RCTResponseSenderBlock)callback)
+RCT_EXTERN_METHOD(
+                  startLongProcess:
+//                  (NSNumber *)delay
+//                  callback:
+                  (RCTResponseSenderBlock)callback)
+
 
 RCT_EXTERN_METHOD(
                   hasAccess: (RCTPromiseResolveBlock)resolve
