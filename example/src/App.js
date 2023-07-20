@@ -36,9 +36,7 @@ export default function App() {
   useEffect(() => {
     checkLocationPermission();
 
-    Service.watchLocation();
-
-    if (Platform.OS !== 'ios')
+    if (Platform.OS === 'android')
       DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
 
     return () => {};
@@ -47,7 +45,7 @@ export default function App() {
   useEffect(() => {
     if (!locationPermission) {
       if (Platform.OS === 'android') {
-        ToastAndroid.show('Location permission required', ToastAndroid.LONG);
+        // ToastAndroid.show('Location permission required', ToastAndroid.LONG);
       } else if (Platform.OS === 'ios') {
         Alert.alert(
           'Location Permission Required',
@@ -113,7 +111,7 @@ export default function App() {
         <TouchableOpacity
           style={styles.buttonTracker}
           onPress={() =>
-            Service.startLocationTracker(
+            Service.watchLocation(
               (location) => console.log('location=>>> ', location),
               options
             )

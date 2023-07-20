@@ -4,6 +4,7 @@ import {
   AppRegistry,
   PermissionsAndroid,
   AppState,
+  ToastAndroid,
 } from 'react-native';
 import {
   BackgroundRunner,
@@ -67,6 +68,7 @@ export const Runnable = ({ children }) => {
   React.useEffect(() => {
     backgroundServer._setup();
     backgroundServer._setUpLocationListener();
+    // backgroundServer.watchLocation();
 
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (
@@ -214,15 +216,13 @@ class BackgroundServer extends EventEmitter {
    */
   // [ANDROID]
   async getCurrentLocation(onSuccess, onError) {
-    if (Platform.OS === 'android') {
-      BackgroundRunner.getCurrentLocation()
-        .then((location) => {
-          onSuccess(location);
-        })
-        .catch((error) => {
-          onError(error);
-        });
-    }
+    BackgroundRunner.getCurrentLocation()
+      .then((location) => {
+        onSuccess(location);
+      })
+      .catch((error) => {
+        onError(error);
+      });
   }
 
   getLocation(onLocation) {
@@ -292,19 +292,20 @@ class BackgroundServer extends EventEmitter {
     };
   }
 
-  /**
-   * Watch the device location continuously and call the callback on location updates.
-   */
-  // [ANDROID]
-  async watchLocation() {
-    await this.checkPermission(BackgroundRunner.startLocationTracking());
-  }
+  // /**
+  //  * Watch the device location continuously and call the callback on location updates.
+  //  */
+  // // [ANDROID]
+  // async watchLocation() {
+  //   await this.checkPermission(BackgroundRunner.startLocationTracking());
+  // }
 
   /**
    * Stop watching the device location.
    */
   // [ANDROID]
   stopWatching() {
+    this.stop();
     BackgroundRunner.stopLocationTracking();
   }
 
@@ -360,28 +361,34 @@ class BackgroundServer extends EventEmitter {
    * @param {Object} optionsParam - Additional options for the location tracker.
    */
   // [ANDROID]
-  async startLocationTracker(callback, optionsParam) {
-    if (!this._isRunning) {
-      const self = this;
-      try {
-        await this.startRunnerTask(async (taskData) => {
-          await this.locationTrackingService(taskData, callback);
-        }, optionsParam);
-        console.log('Successful start!');
-      } catch (e) {
-        console.log('Error', e);
+  async watchLocation(callback, optionsParam) {
+    await this.checkLocationPermissions((isGranted, permissionsStatus) => {
+      if (isGranted) {
+        if (!this._isRunning) {
+          try {
+            BackgroundRunner.startLocationTracking();
+            this.startRunnerTask(async (taskData) => {
+              await this.locationTrackingService(taskData, callback);
+            }, optionsParam);
+            console.log('Successful start!');
+          } catch (e) {
+            console.log('Error', e);
+          }
+        }
+      } else {
+        console.log('Location permissions: ', permissionsStatus);
       }
-    }
+    });
   }
 
   /**
    * Show a permission dialog for location access.
    */
   // [ANDROID]
-  showPermissionDialog() {
+  async showPermissionDialog() {
     Alert.alert(
       'Location Permission',
-      'Allow Location Permission.',
+      'Allow all the time Location Permission.',
       [
         {
           text: 'Go to Settings',
@@ -421,14 +428,74 @@ class BackgroundServer extends EventEmitter {
           console.log('You can use the location');
           onSuccess && onSuccess();
         } else {
-          this.showPermissionDialog();
+          await this.showPermissionDialog();
         }
       } else {
-        this.showPermissionDialog();
+        await this.showPermissionDialog();
         console.log('Location permission denied');
       }
     } catch (err) {
       console.warn(err);
+    }
+  }
+
+  async checkLocationPermissions(callback) {
+    try {
+      const backgroundLocationPermission =
+        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION;
+      const fineLocationPermission =
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+
+      // Check if both fine and background location permissions are already granted
+      const fineLocationStatus = await PermissionsAndroid.check(
+        fineLocationPermission
+      );
+      const backgroundLocationStatus = await PermissionsAndroid.check(
+        backgroundLocationPermission
+      );
+
+      // If both permissions are already granted, call the callback with granted true
+      if (fineLocationStatus && backgroundLocationStatus) {
+        callback(true, { fineLocation: true, backgroundLocation: true });
+        return;
+      }
+
+      // Request both permissions one after the other if not already granted
+      const grantedFineLocation = fineLocationStatus
+        ? PermissionsAndroid.RESULTS.GRANTED
+        : await PermissionsAndroid.request(fineLocationPermission);
+
+      const grantedBackgroundLocation = backgroundLocationStatus
+        ? PermissionsAndroid.RESULTS.GRANTED
+        : await PermissionsAndroid.request(backgroundLocationPermission);
+
+      const permissionsStatus = {
+        fineLocation:
+          grantedFineLocation === PermissionsAndroid.RESULTS.GRANTED,
+        backgroundLocation:
+          grantedBackgroundLocation === PermissionsAndroid.RESULTS.GRANTED,
+      };
+
+      if (
+        permissionsStatus.fineLocation &&
+        permissionsStatus.backgroundLocation
+      ) {
+        // Permissions granted, call the callback with granted true
+        callback(true, permissionsStatus);
+      } else {
+        // Permissions not granted, show a message to the user and call the callback with granted false
+        ToastAndroid.show(
+          'Please enable location permissions',
+          ToastAndroid.LONG
+        );
+        callback(false, permissionsStatus);
+      }
+    } catch (err) {
+      console.warn(err);
+      callback(false, {
+        fineLocation: false,
+        backgroundLocation: false,
+      });
     }
   }
 }
@@ -440,6 +507,7 @@ const iosWrappedFunctions = [
   'foreground',
   '_hasAccess',
   'background',
+  '_setUpLocationListener',
 ];
 wrapFunctions(BackgroundServer.prototype, iosWrappedFunctions, IOSWrapper);
 
@@ -450,6 +518,7 @@ const androidWrappedFunctions = [
   'getCurrentLocation',
   'watchLocation',
   'stopWatching',
+  'checkLocationPermissions',
 ];
 wrapFunctions(
   BackgroundServer.prototype,

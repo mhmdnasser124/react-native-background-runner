@@ -153,9 +153,12 @@ Call **`toggleBackground(task)`** to start or stop the background task.
 ### Location Tracker
 For now, the location tracker only supports **`Android`**. Use the following methods to work with the location tracker:
 
-- Start watching the user's location:
+- Start watching the user's location even if the app is closed:
 ```javascript
-Service.watchLocation();
+Service.watchLocation(
+  (location) => console.log('location =>>> ', location),
+  options
+);
 ```
 - Stop watching the user's location:
 ```javascript
@@ -167,20 +170,6 @@ Service.stopWatching();
 DeviceEventEmitter.addListener('locationUpdate', handleLocationUpdate);
 ```
 
-- Get the current location:
-```javascript
-Service.getCurrentLocation((location) => {
-  console.log('location => ', location);
-  // Your location logic here
-});
-```
-- Track location even if the app is closed:
-```javascript
-Service.startLocationTracker(
-  (location) => console.log('location =>>> ', location),
-  options
-);
-```
 >**⚠️ Please note that the location tracker is currently only supported on Android.**
 
 &nbsp;
