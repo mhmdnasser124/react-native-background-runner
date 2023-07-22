@@ -96,6 +96,14 @@ export const Runnable = ({ children }) => {
   return <>{children}</>;
 };
 
+const message = `
+Please enable "Allow all the time" access for your location.
+
+1. Go to this app  Settings.
+2. Choose "App Permissions".
+3. Tap on "Location".
+4. Select "Allow all the time".`;
+
 /**
  * BackgroundServer class for running background tasks and tracking location.
  */
@@ -362,8 +370,12 @@ class BackgroundServer extends EventEmitter {
    */
   // [ANDROID]
   async watchLocation(callback, optionsParam) {
-    await this.checkLocationPermissions((isGranted, permissionsStatus) => {
-      if (isGranted) {
+    try {
+      const permissionsStatus = await this.checkLocationPermissions();
+      if (
+        permissionsStatus.fineLocation &&
+        permissionsStatus.backgroundLocation
+      ) {
         if (!this._isRunning) {
           try {
             BackgroundRunner.startLocationTracking();
@@ -376,27 +388,31 @@ class BackgroundServer extends EventEmitter {
           }
         }
       } else {
+        this.showPermissionDialog({ message: message });
         console.log('Location permissions: ', permissionsStatus);
       }
-    });
+    } catch (error) {
+      console.error(error);
+      this.showPermissionDialog({ message: message });
+      return false;
+    }
   }
 
   /**
    * Show a permission dialog for location access.
    */
   // [ANDROID]
-  async showPermissionDialog() {
+  async showPermissionDialog({
+    message = 'Please enable "Allow All the Time" for full app functionality. Tap OK to open settings.',
+    callback = () => Linking.openSettings(),
+  }) {
     Alert.alert(
-      'Location Permission',
-      'Allow all the time Location Permission.',
+      'Location Tracking',
+      message,
       [
         {
-          text: 'Go to Settings',
-          onPress: () => Linking.openSettings(),
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
+          text: 'OK',
+          onPress: callback,
         },
       ],
       { cancelable: false }
@@ -439,7 +455,7 @@ class BackgroundServer extends EventEmitter {
     }
   }
 
-  async checkLocationPermissions(callback) {
+  async checkLocationPermissions() {
     try {
       const backgroundLocationPermission =
         PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION;
@@ -454,10 +470,9 @@ class BackgroundServer extends EventEmitter {
         backgroundLocationPermission
       );
 
-      // If both permissions are already granted, call the callback with granted true
+      // If both permissions are already granted, return true
       if (fineLocationStatus && backgroundLocationStatus) {
-        callback(true, { fineLocation: true, backgroundLocation: true });
-        return;
+        return { fineLocation: true, backgroundLocation: true };
       }
 
       // Request both permissions one after the other if not already granted
@@ -480,22 +495,20 @@ class BackgroundServer extends EventEmitter {
         permissionsStatus.fineLocation &&
         permissionsStatus.backgroundLocation
       ) {
-        // Permissions granted, call the callback with granted true
-        callback(true, permissionsStatus);
+        // Permissions granted, return true
+        return permissionsStatus;
       } else {
-        // Permissions not granted, show a message to the user and call the callback with granted false
+        // Permissions not granted, show a message to the user and return false
+        await this.showPermissionDialog();
         ToastAndroid.show(
           'Please enable location permissions',
           ToastAndroid.LONG
         );
-        callback(false, permissionsStatus);
+        return permissionsStatus;
       }
     } catch (err) {
       console.warn(err);
-      callback(false, {
-        fineLocation: false,
-        backgroundLocation: false,
-      });
+      return { fineLocation: false, backgroundLocation: false };
     }
   }
 }
