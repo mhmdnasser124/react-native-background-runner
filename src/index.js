@@ -57,6 +57,14 @@ function wrapFunctions(target, functionNames, wrapper) {
   }
 }
 
+const message = `
+Please enable "Allow all the time" access for your location.
+
+1. Go to this app  Settings.
+2. Choose "App Permissions".
+3. Tap on "Location".
+4. Select "Allow all the time".`;
+
 /**
  * Component that sets up the background server and handles app state changes.
  * @param {Object} props - The component props.
@@ -96,14 +104,6 @@ export const Runnable = ({ children }) => {
   return <>{children}</>;
 };
 
-const message = `
-Please enable "Allow all the time" access for your location.
-
-1. Go to this app  Settings.
-2. Choose "App Permissions".
-3. Tap on "Location".
-4. Select "Allow all the time".`;
-
 /**
  * BackgroundServer class for running background tasks and tracking location.
  */
@@ -115,6 +115,7 @@ class BackgroundServer extends EventEmitter {
     this._isRunning = false;
     this._currentOptions;
     this._addListeners();
+    this.isLocationgTrackerRunning = false;
   }
 
   /**
@@ -218,26 +219,6 @@ class BackgroundServer extends EventEmitter {
   }
 
   /**
-   * Get the current device location.
-   * @param {Function} onSuccess - Success callback function that receives the location.
-   * @param {Function} onError - Error callback function that receives the error.
-   */
-  // [ANDROID]
-  async getCurrentLocation(onSuccess, onError) {
-    BackgroundRunner.getCurrentLocation()
-      .then((location) => {
-        onSuccess(location);
-      })
-      .catch((error) => {
-        onError(error);
-      });
-  }
-
-  getLocation(onLocation) {
-    BackgroundRunner.getCurrentLocation();
-  }
-
-  /**
    * Start a background runner task.
    * @param {Function} task - The task to be executed in the background.
    * @param {Object} options - Additional options for the task.
@@ -300,20 +281,13 @@ class BackgroundServer extends EventEmitter {
     };
   }
 
-  // /**
-  //  * Watch the device location continuously and call the callback on location updates.
-  //  */
-  // // [ANDROID]
-  // async watchLocation() {
-  //   await this.checkPermission(BackgroundRunner.startLocationTracking());
-  // }
-
   /**
    * Stop watching the device location.
    */
   // [ANDROID]
   stopWatching() {
     this.stop();
+    this.isLocationgTrackerRunning = false;
     BackgroundRunner.stopLocationTracking();
   }
 
@@ -350,17 +324,60 @@ class BackgroundServer extends EventEmitter {
           return;
         }
 
-        this.getCurrentLocation(async (location) => {
-          if (
-            location.longitude !== lastLocation.longitude &&
-            location.latitude !== lastLocation.latitude
-          ) {
-            lastLocation = location;
-            callback(location);
-          }
-        });
+        BackgroundRunner.getCurrentLocation()
+          .then((location) => {
+            if (
+              !!location &&
+              location.longitude !== lastLocation.longitude &&
+              location.latitude !== lastLocation.latitude
+            ) {
+              lastLocation = location;
+              callback(location);
+            }
+          })
+          .catch((error) => {});
       }, trackingDelay);
     });
+  }
+
+  /**
+   * Get the current device location.
+   * @param {Function} onSuccess - Success callback function that receives the location.
+   * @param {Function} onError - Error callback function that receives the error.
+   */
+  // [ANDROID]
+  async getCurrentLocation(onSuccess, onError) {
+    try {
+      const permissionsStatus = await this.checkLocationPermissions();
+      if (
+        permissionsStatus.fineLocation &&
+        permissionsStatus.backgroundLocation
+      ) {
+        BackgroundRunner.startLocationTracking();
+        BackgroundRunner.getCurrentLocation()
+          .then((location) => {
+            onSuccess(location);
+          })
+          .catch((error) => {
+            onError(error);
+          });
+      } else {
+        this.showPermissionDialog({
+          message: message,
+        });
+        console.log('Location permissions: ', permissionsStatus);
+      }
+    } catch (error) {
+      console.error(error);
+      onError(error);
+    }
+  }
+
+  startLocationTracking() {
+    if (!this.isLocationgTrackerRunning) {
+      BackgroundRunner.startLocationTracking();
+    }
+    this.isLocationgTrackerRunning = true;
   }
 
   /**
@@ -388,12 +405,13 @@ class BackgroundServer extends EventEmitter {
           }
         }
       } else {
-        this.showPermissionDialog({ message: message });
+        this.showPermissionDialog({
+          message: message,
+        });
         console.log('Location permissions: ', permissionsStatus);
       }
     } catch (error) {
       console.error(error);
-      this.showPermissionDialog({ message: message });
       return false;
     }
   }

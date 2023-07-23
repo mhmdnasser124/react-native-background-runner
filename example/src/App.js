@@ -121,6 +121,22 @@ export default function App() {
             Toggle Location Tracker
           </Text>
         </TouchableOpacity>
+        <View style={{ height: 10 }} />
+
+        <TouchableOpacity
+          style={styles.buttonTracker}
+          onPress={() =>
+            Service.getCurrentLocation(
+              (location) => console.log('location=>>> ', location),
+              (error) => console.log('error=>>>', error)
+            )
+          }
+        >
+          <Text style={{ color: 'white', alignSelf: 'center' }}>
+            Get Current Location
+          </Text>
+        </TouchableOpacity>
+        <View style={{ height: 10 }} />
 
         <View style={{}}>
           <Text style={styles.runnedValue}>{`Runned -> ${runnedValue}`}</Text>
