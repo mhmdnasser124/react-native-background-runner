@@ -27,7 +27,7 @@ npm install react-native-background-runner
 
 ## Features 🚀🚀
 
-- #### 🛠️ Background Problem Solver: Our package is designed to tackle background-related issues on both iOS and Android platforms.
+- #### 🛠️ Our package is designed to tackle background-related issues on both iOS and Android platforms.
 
 - #### 🧪 Test Phase: We are currently in the initial testing phase, with many exciting enhancements on the way.
 
