@@ -97,7 +97,7 @@ export const Runnable = ({ children }) => {
     });
 
     return () => {
-      subscription.remove();
+      !!subscription && subscription.remove();
     };
   }, []);
 

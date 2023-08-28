@@ -68,13 +68,13 @@ public class BackgroundRunnerModule extends ReactContextBaseJavaModule implement
           // Create a new writable map to hold the location data
           WritableMap locationData = Arguments.createMap();
 
-          // Add the relevant location properties to the map
           locationData.putDouble("latitude", location.getLatitude());
           locationData.putDouble("longitude", location.getLongitude());
           locationData.putDouble("accuracy", location.getAccuracy());
-
-          // Resolve the promise with the location data
-          promise.resolve(locationData);
+          locationData.putDouble("heading", location.getBearing());
+          locationData.putDouble("speed", location.getSpeed());
+          locationData.putDouble("time", location.getTime());
+           promise.resolve(locationData);
 
 //        promise.resolve(location);
         }
